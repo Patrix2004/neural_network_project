@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 import numpy as np
 import pandas as pd
-
+import matplotlib.pyplot as plt
 class Layer(ABC):
     
     @abstractmethod
@@ -46,7 +46,9 @@ class Dense(Layer):
         self.out_features = out_features
         
         # He initialization
-        self.weights = np.random.randn(in_features, out_features) * np.sqrt(2 / in_features)
+        # self.weights = np.random.randn(in_features, out_features) * np.sqrt(2 / in_features)
+        #Xavier
+        self.weights = np.random.randn(in_features, out_features) * np.sqrt(2/ (in_features + out_features))
         self.biases = np.zeros(out_features)
     
     def forward(self, input):
@@ -74,6 +76,18 @@ class ReLU(Layer):
     def update(self, lr):
         pass
 
+class Sigmoid(Layer):
+    
+    def forward(self, input):
+        self.value = 1 / (1 + np.exp(-1 * input))
+        return self.value
+    
+    def backward(self, dA):
+        return dA * (self.value * (1 - self.value))
+    
+    def update(self, lr):
+        pass
+ 
 class Network():
     
     def __init__(self, layers):
@@ -94,24 +108,25 @@ class Network():
 
 per = Network(
     [
-        Dense(2, 10),
-        ReLU(),
-        Dense(10, 2),
-        ReLU(),
+        Dense(1, 128),
+        Sigmoid(),
+        Dense(128, 128),
+        Sigmoid(),
+        Dense(128, 1),
     ]
 )
 
-df = pd.read_csv("/home/SOS/Downloads/projekt1/classification/data.simple.train.100.csv")
+df = pd.read_csv("/home/SOS/Downloads/projekt1/regression/data.cube.train.10000.csv")
 
 n = 20
-epochs = 5
+epochs = 500
 list_df = [df[i:i + n] for i in range(0, df.shape[0], n)]
 
-for epoch in epochs:
+for epoch in range(epochs):
     for batch in list_df:
-        target = df[-1]
+        target = batch.iloc[:, -1:].to_numpy()
         
-        pred = per.forward(df[0:2].to_numpy())
+        pred = per.forward(batch.iloc[:, 0].to_numpy().reshape((n, 1)))
 
         loss = MSE.forward(target, pred)
 
@@ -119,4 +134,29 @@ for epoch in epochs:
 
         per.backward(gradient)
 
-        per.update(0.01)
+        per.update(0.001)
+
+df = pd.read_csv("/home/SOS/Downloads/projekt1/regression/data.cube.test.1000.csv")
+
+target = df.iloc[:, -1:].to_numpy()
+
+pred = per.forward(np.array(df.iloc[:, 0]).reshape((-1,1)))
+
+loss = MSE.forward(target, pred)
+
+print(df.iloc[:, [0, -1]].describe())
+
+print(pred - target)
+
+x = df.iloc[:, 0]
+
+plt.scatter(x, target, label = "Target")
+plt.scatter(x, pred, label = "Prediction")
+
+plt.xlabel("x")
+plt.ylabel("y")
+plt.legend()
+plt.show()
+
+print(per.layers[0].weights)
+print(per.layers[0].biases)
