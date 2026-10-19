@@ -13,6 +13,22 @@ class ReLU(Layer):
     def update(self, lr):
         pass
 
+class LeakyReLU(Layer):
+    
+    def __init__(self, a=0.01):
+        super().__init__()
+        self.a = a
+    
+    def forward(self, input):
+        self.mask = input > 0
+        return np.where(self.mask, input, input * self.a)
+    
+    def backward(self, dA):
+        return dA * np.where(self.mask, 1, self.a)
+    
+    def update(self, lr):
+        pass
+
 class Sigmoid(Layer):
     
     def forward(self, input):
