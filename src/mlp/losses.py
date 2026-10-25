@@ -20,3 +20,13 @@ class MSE(Loss):
     @staticmethod
     def backward(target, predicted):
         return 2 * (predicted - target) / (target.shape[0] * target.shape[1])
+
+class MAE(Loss):
+    
+    @staticmethod
+    def forward(target, predicted):
+        return np.sum(np.abs(predicted - target)) / (target.shape[0] * target.shape[1])
+    
+    @staticmethod
+    def backward(target, predicted):
+        return np.sign(predicted - target) / (target.shape[0] * target.shape[1])
