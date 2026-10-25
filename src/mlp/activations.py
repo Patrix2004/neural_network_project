@@ -40,4 +40,13 @@ class Tanh(Layer):
     
     def backward(self, dA):
         return dA * (1 - np.square(self.value))
+
+class Softmax(Layer):
     
+    def forward(self, input):
+        exp = np.exp(input - np.max(input, axis=1, keepdims=True))
+        self.value = exp / np.sum(exp, axis=1, keepdims=True)
+        return self.value
+    
+    def backward(self, dA):
+        return self.value * (dA - np.sum(dA * self.value, axis=1, keepdims=True))
