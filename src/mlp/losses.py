@@ -30,3 +30,14 @@ class MAE(Loss):
     @staticmethod
     def backward(target, predicted):
         return np.sign(predicted - target) / (target.shape[0] * target.shape[1])
+
+class CrossEntropy(Loss):
+    eps = 1e-12
+    
+    @staticmethod
+    def forward(target, predicted):
+        return -np.sum(target * np.log(predicted + CrossEntropy.eps)) / target.shape[0]
+    
+    @staticmethod
+    def backward(target, predicted):
+        return -target / (predicted + CrossEntropy.eps) / target.shape[0]
