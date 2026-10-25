@@ -16,7 +16,7 @@ class Layer(ABC):
 
 class Dense(Layer):
     
-    def __init__(self, in_features, out_features):
+    def __init__(self, in_features, out_features, rng, bias = True):
         super().__init__()
         
         self.in_features = in_features
@@ -25,8 +25,9 @@ class Dense(Layer):
         # He initialization
         # self.weights = np.random.randn(in_features, out_features) * np.sqrt(2 / in_features)
         #Xavier
-        self.weights = np.random.randn(in_features, out_features) * np.sqrt(2/ (in_features + out_features))
+        self.weights = rng.randn(in_features, out_features) * np.sqrt(2/ (in_features + out_features))
         self.biases = np.zeros(out_features)
+        self.bias = bias
     
     def forward(self, input):
         self.input = input
@@ -34,7 +35,7 @@ class Dense(Layer):
     
     def backward(self, dZ):
         self.dweights = self.input.T @ dZ
-        self.dbiases = np.sum(dZ, axis=0)
+        self.dbiases = np.sum(dZ, axis=0) if self.bias else np.zeros_like(self.biases)
         return dZ @ self.weights.T
     
     def update(self, lr):
