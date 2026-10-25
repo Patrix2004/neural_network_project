@@ -11,9 +11,8 @@ class Layer(ABC):
     def backward(self, gradient):
         ...
     
-    @abstractmethod
     def update(self, lr):
-        ...
+        pass
 
 class Dense(Layer):
     

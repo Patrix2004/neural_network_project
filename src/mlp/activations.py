@@ -9,9 +9,6 @@ class ReLU(Layer):
     
     def backward(self, dA):
         return dA * self.mask
-    
-    def update(self, lr):
-        pass
 
 class LeakyReLU(Layer):
     
@@ -25,9 +22,6 @@ class LeakyReLU(Layer):
     
     def backward(self, dA):
         return dA * np.where(self.mask, 1, self.a)
-    
-    def update(self, lr):
-        pass
 
 class Sigmoid(Layer):
     
@@ -38,5 +32,3 @@ class Sigmoid(Layer):
     def backward(self, dA):
         return dA * (self.value * (1 - self.value))
     
-    def update(self, lr):
-        pass
