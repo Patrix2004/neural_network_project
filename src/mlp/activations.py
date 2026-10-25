@@ -31,4 +31,13 @@ class Sigmoid(Layer):
     
     def backward(self, dA):
         return dA * (self.value * (1 - self.value))
+
+class Tanh(Layer):
+    
+    def forward(self, input):
+        self.value = np.tanh(input)
+        return self.value
+    
+    def backward(self, dA):
+        return dA * (1 - np.square(self.value))
     
