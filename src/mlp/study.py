@@ -73,13 +73,13 @@ def summarize(df, metrics):
 
 def run_study(name, configs, ds, args, out_dir, metrics, loss_curves=True, depth_plot=False):
     out_dir = Path(out_dir) / name
-    print(f"\n=== {ds.name} / {name}: {len(configs)} configs x {args.seeds} seeds ===")
-    
+    print(f"\n=== {ds.name} / {name}: {len(configs)} configs x {len(args.seeds)} seeds ===")
+
     runs = []
     for cfg in configs:
-        for seed in range(args.seeds):
+        for seed in args.seeds:
             runs.append(run_config(cfg, ds, seed))
-        scores = runs_to_frame(runs[-args.seeds:])[[m[0] for m in metrics]].mean()
+        scores = runs_to_frame(runs[-len(args.seeds):])[[m[0] for m in metrics]].mean()
         print(f"  {cfg.label:<18}" + "  ".join(f"{k}={v:.4g}" for k, v in scores.items()))
     
     df = runs_to_frame(runs)
@@ -130,7 +130,7 @@ STUDIES = {"activation": study_activations, "architecture": study_architectures,
 
 def baseline(ds, base, args, out_dir):
     # one run with all required visualizations: fit, error over epochs, weights evolution
-    run = run_config(base, ds, seed=args.seed)
+    run = run_config(base, ds, seed=args.seeds[0])
     print(f"\n=== {ds.name} / baseline ({base.activation}, {arch_name(base.hidden)}): test {run.test} ===")
     viz.plot_run(run.net, ds, run.history, base.loss.upper(), Path(out_dir) / "baseline", show=args.show)
 
@@ -143,12 +143,11 @@ def main(task):
     parser = argparse.ArgumentParser(description=f"Studies for {task}")
     parser.add_argument("--data-dir", default="/home/SOS/Downloads/projekt1")
     parser.add_argument("--problems", nargs="*", help="nazwy problemów, domyślnie oba z data.PROBLEMS")
-    parser.add_argument("--sizes", nargs="*", type=int, default=[1000], choices=data.SIZES,
-                        help="rozmiary zbioru uczącego, np. --sizes 100 1000 10000")
+    parser.add_argument("--sizes", nargs="*", type=int, default=[1000], choices=data.SIZES, help="rozmiary zbioru uczącego, np. --sizes 100 1000 10000")
     parser.add_argument("--out", default="results")
     parser.add_argument("--studies", nargs="*", choices=["baseline", *STUDIES], default=["baseline", *STUDIES])
-    parser.add_argument("--seeds", type=int, default=5, help="number of repetitions per configuration")
-    parser.add_argument("--seed", type=int, default=0, help="seed of the baseline run")
+    parser.add_argument("--seeds", type=int, nargs="*", help="seeds of the runs, e.g. --seeds 1 2 3; if not given, random ones are generated")
+    parser.add_argument("--n-seeds", type=int, default=5, help="how many random seeds to generate when --seeds is not given")
     parser.add_argument("--epochs", type=int, default=500)
     parser.add_argument("--patience", type=int, default=50)
     parser.add_argument("--lr", type=float, default=0.05)
@@ -161,6 +160,9 @@ def main(task):
     
     if args.quick:
         args.seeds, args.epochs, args.patience = 2, 100, 20
+    if not args.seeds:
+        args.seeds = np.random.RandomState().randint(0, 2**31 - 1, args.n_seeds).tolist()
+    print(f"Seeds: {args.seeds}  (reproduce with --seeds {' '.join(map(str, args.seeds))})")
     if not args.show:
         import matplotlib
         matplotlib.use("Agg")
