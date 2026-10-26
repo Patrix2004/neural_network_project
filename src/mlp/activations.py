@@ -1,5 +1,5 @@
 import numpy as np
-from src.mlp.layers import Layer
+from mlp.layers import Layer
 
 class ReLU(Layer):
     
