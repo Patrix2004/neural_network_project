@@ -1,2 +1,6 @@
 __pycache__
 .ipynb_checkpoints
+/results
+/src/nn_p1.egg-info
+pyproject.toml
+uv.lock
