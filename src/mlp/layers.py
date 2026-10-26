@@ -14,20 +14,30 @@ class Layer(ABC):
     def update(self, lr):
         pass
 
+INIT_SCALES = {
+    # He: variance 2 / fan_in, for rectifiers
+    "relu": lambda i, o: np.sqrt(2 / i),
+    "leaky_relu": lambda i, o: np.sqrt(2 / i),
+    # Xavier (Glorot): variance 2 / (fan_in + fan_out), for symmetric / saturating functions
+    "sigmoid": lambda i, o: np.sqrt(2 / (i + o)),
+    "tanh": lambda i, o: np.sqrt(2 / (i + o)),
+    "softmax": lambda i, o: np.sqrt(2 / (i + o)),
+    "linear": lambda i, o: np.sqrt(2 / (i + o)),
+}
+
 class Dense(Layer):
     
-    def __init__(self, in_features, out_features, rng, bias = True):
+    def __init__(self, in_features, out_features, rng, activation="linear", bias=True):
         super().__init__()
         
         self.in_features = in_features
         self.out_features = out_features
-        
-        # He initialization
-        # self.weights = np.random.randn(in_features, out_features) * np.sqrt(2 / in_features)
-        #Xavier
-        self.weights = rng.randn(in_features, out_features) * np.sqrt(2/ (in_features + out_features))
-        self.biases = np.zeros(out_features)
+        self.activation = activation
         self.bias = bias
+        
+        scale = INIT_SCALES[activation](in_features, out_features)
+        self.weights = rng.randn(in_features, out_features) * scale
+        self.biases = np.zeros(out_features)
     
     def forward(self, input):
         self.input = input
