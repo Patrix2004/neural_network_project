@@ -109,7 +109,13 @@ def study_activations(ds, base, args, out_dir, metrics):
     configs = [replace(base, label=a, activation=a) for a in ("sigmoid", "tanh", "relu", "leaky_relu")]
     return run_study("activation", configs, ds, args, out_dir, metrics)
 
-ARCHITECTURES = [[], [8], [32], [128], [8, 8], [32, 32], [16] * 3, [32] * 3, [16] * 4, [32] * 4]
+ARCHITECTURES = [
+    [],
+    [8], [32], [128],
+    [32, 32], [64, 16],
+    [32, 32, 32], [64, 32, 16],
+    [32] * 4, [64, 32, 16, 8],
+]
 
 def study_architectures(ds, base, args, out_dir, metrics):
     configs = [replace(base, label=f"{len(h)} | {arch_name(h)}", hidden=h) for h in ARCHITECTURES]
