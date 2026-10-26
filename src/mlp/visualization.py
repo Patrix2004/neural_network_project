@@ -104,7 +104,7 @@ def plot_decision_regions(net, ds, ax, split="test", title=None, resolution=300)
     ax.scatter(X[wrong, 0], X[wrong, 1], s=45, facecolors="none", edgecolors="black", linewidth=1, label="błędne")
     
     acc = 1 - wrong.mean()
-    ax.set_title(title or f"{'Zbiór testowy' if split == 'test' else 'Zbiór uczący'}: accuracy={acc:.3f}")
+    ax.set_title(title or f"{'Zbiór testowy' if split == 'test' else 'Zbiór uczący'}: dokładność={acc:.3f}")
     ax.set_xlabel("x₁")
     ax.set_ylabel("x₂")
     ax.set_xlim(xx.min(), xx.max())
@@ -138,7 +138,7 @@ def plot_training(history, task, loss_name="strata", title=None):
     ax.legend()
     
     ax = axes[1]
-    metric_name = "R²" if task == "regression" else "accuracy"
+    metric_name = "R²" if task == "regression" else "dokładność"
     ax.plot(epochs, history.train_metric, label="uczący", lw=1.8)
     if history.val_metric:
         ax.plot(epochs, history.val_metric, label="walidacyjny", lw=1.8)
