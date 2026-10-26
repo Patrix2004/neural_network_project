@@ -18,7 +18,7 @@ def build_mlp(n_in, hidden, n_out, activation="sigmoid", output_activation=None,
     sizes = [n_in] + list(hidden) + [n_out]
     layers = []
     for i in range(len(sizes) - 1):
-        layers.append(Dense(sizes[i], sizes[i + 1], rng, bias))
+        layers.append(Dense(sizes[i], sizes[i + 1], rng, activation, bias))
         if i < len(sizes) - 2:
             layers.append(ACTIVATIONS[activation]())
     
